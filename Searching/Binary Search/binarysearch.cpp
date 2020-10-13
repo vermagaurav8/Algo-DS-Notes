@@ -1,58 +1,38 @@
 #include <iostream>
-
 using namespace std;
 
-int binarysearch(int array[],int size,int x)
-{															// code for the binary search
-	int firstindex = 0;
-	int lastindex = size-1;
-	
-
-	while(firstindex<=lastindex)
-	{
-		int middle = (firstindex +lastindex)/2;
-
-		if(array[middle] == x){
-			return middle;
+int binarySearch(int arr[], int n, int x) {
+	int start = 0, end = n - 1;
+	while(start <= end) {
+		int mid = (start + end) / 2;
+		if(arr[mid] == x) {
+			return mid;
 		}
-		else if(array[middle] > x)
-		{
-			lastindex = middle-1;
+		else if(x < arr[mid]) {
+			end = mid - 1;
 		}
-		else if(array[middle] < x)
-		{
-			firstindex = middle + 1;
+		else {
+			start = mid + 1;
 		}
 	}
+
 	return -1;
+}
 
-};
+int main() {
+	// Take array input from the user
+	int n;
+	cin >> n;
 
-int main()
-{
-
-	int array[100],size,i,x;
-
-	cout<<"Enter the size of the array : ";
-	cin>>size;
-
-	cout <<"Enter the array : ";
-	for(i=0;i<size;i++)
-	{
-		cin>>array[i];
+	int input[100];
+	
+	for(int i = 0; i < n; i++) {
+		cin >> input[i];
 	}
 
+	int x;
+	cin >> x;
 
-	cout<<"Enter the number you want to search"<<endl;
-	cin>>x;
+	cout << binarySearch(input, n, x) << endl; 	
 
-	int result =binarysearch(array,size,x);
-
-	if(result == -1){
-		cout<<"element is not  found";
-	}else{
-		cout<<"element found at index "<<result;
-	}
-
-	return 0;
 }
