@@ -9,99 +9,80 @@ using namespace std;
 class LRUCache
 {
     private:
-        struct node {
-            int key, val;
-            node* prev;
-            node* next;
-            
-            node(int k, int v) {
-                key = k;
-                val = v;
-            }
-        };
+    class Node {
+        public:
+        int key;
+        int val;
+        Node *prev, *next;
         
-        node* head = new node(-1, -1);
-        node* tail = new node(-1, -1);
+        Node(int k, int v) {
+            key = k;
+            val = v;
+            prev = next = nullptr;
+        }
+    };
+    
+    Node *head = new Node(-1, -1);
+    Node *tail = new Node(-1, -1);
+    unordered_map<int, Node*> mp;
+    int size;
+    
+    void addNode(Node *ptr) {
+        ptr->prev = head;
+        ptr->next = head->next;
+        head->next->prev = ptr;
+        head->next = ptr;
+    }
+    
+    void deleteNode(Node *ptr) {
+        Node *next_of_ptr = ptr->next;
+        Node *prev_of_ptr = ptr->prev;
         
-        int capacity;
-        unordered_map<int, node*> mp;
+        prev_of_ptr->next = next_of_ptr;
+        next_of_ptr->prev = prev_of_ptr;
         
+        delete ptr;
+    }
+    
     public:
-    //Constructor for initializing the cache capacity with the given value.
+    
     LRUCache(int cap)
     {
-        // code here
-        capacity = cap;
+        size = cap;
         head->next = tail;
-        head->prev = nullptr;
-        tail->next = nullptr;
         tail->prev = head;
     }
     
-    void insert(node* temp)
-    {
-        temp->next=head->next;
-        head->next->prev=temp;
-        head->next=temp;
-        temp->prev=head;
-        
-        mp[temp->key]=temp;
-    }
-
-    void rem(node* temp)
-    {
-        temp->prev->next=temp->next;
-        temp->next->prev=temp->prev;
-    }
-    
-    //Function to return value corresponding to the key.
     int GET(int key)
     {
-        // your code here
-        if(mp.find(key) == mp.end())
-            return -1;
-        
-        node* curr = mp[key];
-        rem(curr);
-        insert(curr);
-        return curr->val;
+        if(mp.find(key) != mp.end()) {
+            Node* resnode = mp[key];
+            int res = resnode->val;
+            deleteNode(resnode);
+
+            Node *newNode = new Node(key, res);
+            addNode(newNode);
+            mp[key] = newNode;
+            
+            return res;
+        }
+        return -1;
     }
     
-    //Function for storing key-value pair.
     void SET(int key, int value)
     {
-        // your code here 
-        //If key is already present in the cache
-        if(mp.find(key)!=mp.end())
-        {
-            node* cur=mp[key];
-            cur->val=value;
-            
-            rem(cur);
-            insert(cur);
-            
+        if(mp.find(key) != mp.end()) {
+            Node* resnode = mp[key];
+            deleteNode(resnode);
         }
-        //if key is not present and also the cache size is less than this capacity
-        else if(mp.size()<capacity)
-        {
-            node* newnode=new node(key,value);
-            insert(newnode);
+        else if(mp.size() == size) {
+            mp.erase(tail->prev->key);
+            deleteNode(tail->prev);
         }
-        //when cache size is full and need to insert new key
-        else
-        {
-            //permanently remove the least used node
-            node* cur=tail->prev;
-            rem(cur);
-            mp.erase(cur->key);
-            delete cur;
-            
-            //insert the new node
-            node* newnode=new node(key,value);
-            insert(newnode);
-            
-            
-        }
+        
+        Node *newNode = new Node(key, value);
+        addNode(newNode);
+        mp[key] = newNode;
     }
 };
 
